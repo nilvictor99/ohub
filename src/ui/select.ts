@@ -54,12 +54,11 @@ export async function select(
   const row = (item: SelectItem, position: number, selected: boolean) => {
     const hue = selected ? cyan : (item.color ?? PALETTE[position % PALETTE.length]);
     const style = selected ? `${hue}${bold}` : hue;
+    if (!color) return `${indent}${item.label}${item.hint ? " ".repeat(labelWidth - cellWidth(item.label) + gap) + item.hint : ""}`;
+    if (!item.hint) return `${indent}${style}${item.label}${reset}`;
     const padding = " ".repeat(labelWidth - cellWidth(item.label) + gap);
-    const hint = item.hint ? truncate(item.hint, hintBudget) : "";
-    const hintPart = hint ? `${dim}${hint}${reset}` : "";
-    const plain = `${indent}${item.label}${padding}${hint}`;
-    if (!color) return plain;
-    return `${indent}${style}${item.label}${reset}${padding}${hintPart}`;
+    const hint = truncate(item.hint, hintBudget);
+    return `${indent}${style}${item.label}${reset}${padding}${dim}${hint}${reset}`;
   };
 
   process.stderr.write(`${color ? `${bold}${cyan}${question}${reset}` : question}\n`);
@@ -94,8 +93,8 @@ export async function select(
       } else {
         const item = items[value];
         const hue = item.color ?? PALETTE[value % PALETTE.length];
+        const padding = item.hint ? " ".repeat(labelWidth - cellWidth(item.label) + gap) : "";
         const hint = item.hint ? truncate(item.hint, hintBudget) : "";
-        const padding = " ".repeat(labelWidth - cellWidth(item.label) + gap);
         const hintPart = hint ? `${color ? `${dim}${hint}${reset}` : hint}` : "";
         process.stderr.write(
           `${color ? `${bold}${hue}${item.label}${reset}` : item.label}${padding}${hintPart}\n`,
