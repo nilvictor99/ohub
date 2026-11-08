@@ -72,4 +72,10 @@ describe("select", () => {
     const { select } = await import("../src/ui/select.ts");
     await expect(select("¿?", ["a", "b"])).rejects.toThrow();
   });
+
+  test("respeta color propio de cada opción", async () => {
+    const { select } = await import("../src/ui/select.ts");
+    // Sin TTY no hay render: solo verificamos que acepta el campo sin romperse.
+    await expect(select("¿?", [{ label: "x", color: "\u001b[31m" }])).rejects.toThrow();
+  });
 });

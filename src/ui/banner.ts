@@ -9,7 +9,7 @@ interface BannerConfig {
   subtitle: string;
   version: string;
   icon: string;
-  theme: "default" | "tech" | "neon" | "minimal";
+  theme: string;
 }
 
 const DEFAULTS: BannerConfig = {
@@ -21,11 +21,14 @@ const DEFAULTS: BannerConfig = {
   theme: "tech",
 };
 
-const THEMES: Record<string, string> = {
-  default: "\u001b[36m",
-  tech: "\u001b[36m",
-  neon: "\u001b[35m",
-  minimal: "",
+const THEMES: Record<string, string[]> = {
+  default: ["\u001b[36m", "\u001b[36m", "\u001b[34m"],
+  tech: ["\u001b[36m", "\u001b[35m", "\u001b[34m"],
+  fire: ["\u001b[31m", "\u001b[33m", "\u001b[31m"],
+  ocean: ["\u001b[34m", "\u001b[36m", "\u001b[34m"],
+  forest: ["\u001b[32m", "\u001b[36m", "\u001b[32m"],
+  neon: ["\u001b[35m", "\u001b[36m", "\u001b[35m"],
+  minimal: ["", "", ""],
 };
 
 export function loadBannerConfig(): BannerConfig {
@@ -42,20 +45,24 @@ export function loadBannerConfig(): BannerConfig {
 
 export function renderBanner(config = loadBannerConfig()): string {
   const unicode = supportsUnicode();
-  const paint = colorEnabled() && THEMES[config.theme] ? THEMES[config.theme] : "";
-  const reset = paint ? "\u001b[0m" : "";
+  const theme = THEMES[config.theme] ?? THEMES.tech;
+  const colored = colorEnabled() && theme.some(Boolean);
+  const [border, strong, weak] = theme;
+  const reset = "\u001b[0m";
+  const edge = colored ? border : "";
+  const paint = (text: string, hue: string) => (colored ? `${hue}${text}${reset}` : text);
   const title = `${config.icon ? `${config.icon} ` : ""}${config.title} v${config.version}`;
   const subtitle = config.subtitle;
   const columns = Math.max(40, process.stdout.columns || 80);
 
   if (config.type === "header") {
-    return `${paint}${title}${reset} ${dim(`— ${subtitle}`)}`;
+    return `${paint(title, strong)} ${dim(`— ${subtitle}`)}`;
   }
 
   if (config.type === "simple-lines") {
     const width = Math.max(20, Math.min(columns, Math.max(title.length, subtitle.length) + 2));
-    const line = (unicode ? "─" : "-").repeat(width);
-    return [paint + line + reset, `${paint}${title}${reset}`, dim(subtitle), paint + line + reset].join("\n");
+    const rule = (unicode ? "─" : "-").repeat(width);
+    return [paint(rule, edge), paint(title, strong), dim(subtitle), paint(rule, edge)].join("\n");
   }
 
   const inner = Math.max(20, Math.min(columns - 4, Math.max(title.length, subtitle.length) + 2));
@@ -63,12 +70,7 @@ export function renderBanner(config = loadBannerConfig()): string {
   const bottom = unicode ? `╰${"─".repeat(inner)}╯` : `+${"-".repeat(inner)}+`;
   const bar = unicode ? "│" : "|";
   const pad = (text: string) => `${bar} ${text.padEnd(inner - 1)}${bar}`;
-  return [
-    paint + top + reset,
-    `${paint}${pad(title)}${reset}`,
-    `${paint}${pad(subtitle)}${reset}`,
-    paint + bottom + reset,
-  ].join("\n");
+  return [paint(top, edge), paint(pad(title), strong), paint(pad(subtitle), weak), paint(bottom, edge)].join("\n");
 }
 
 function dim(text: string): string {

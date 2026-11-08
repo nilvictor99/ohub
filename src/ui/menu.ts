@@ -16,32 +16,32 @@ import { resolveTarget } from "../core/paths.ts";
 import { renderBanner } from "./banner.ts";
 
 const MAIN = [
-  { label: "Gestionar servidores MCP", hint: "añadir · activar · eliminar" },
-  { label: "Gestionar plugins", hint: "añadir · actualizar · eliminar" },
-  { label: "Diagnóstico (doctor)", hint: "revisa la configuración" },
-  { label: "Rutas de configuración", hint: "global y proyecto" },
-  { label: "Reiniciar servicio de opencode", hint: "aplica los cambios" },
-  { label: "Ayuda", hint: "comandos directos" },
-  { label: "Salir" },
+  { label: "🖥️ Servidores MCP", hint: "añadir · activar · eliminar" },
+  { label: "🔌 Plugins", hint: "añadir · actualizar · eliminar" },
+  { label: "🩺 Diagnóstico", hint: "revisa config" },
+  { label: "🗺️ Rutas", hint: "global · proyecto" },
+  { label: "🔄 Reiniciar", hint: "aplica cambios" },
+  { label: "❓ Ayuda", hint: "comandos" },
+  { label: "🚪 Salir" },
 ];
 
 const MCP_MENU = [
-  "Listar servidores MCP",
-  "Añadir servidor remoto",
-  "Añadir servidor local",
-  "Activar / desactivar",
-  "Ver detalle",
-  { label: "Eliminar servidor", hint: "pide confirmación" },
-  "Volver",
+  { label: "📋 Listar", hint: "todos" },
+  { label: "🌐 Remoto", hint: "por URL" },
+  { label: "💻 Local", hint: "comando" },
+  { label: "🔁 Alternar", hint: "activo/inactivo" },
+  { label: "🔍 Detalle", hint: "ver ficha" },
+  { label: "🗑️ Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
+  { label: "↩️ Volver" },
 ];
 
 const PLUGIN_MENU = [
-  "Listar plugins",
-  "Añadir plugin",
-  "Actualizar un plugin",
-  "Actualizar todos",
-  { label: "Eliminar plugin", hint: "pide confirmación" },
-  "Volver",
+  { label: "📋 Listar", hint: "instalados" },
+  { label: "➕ Añadir", hint: "paquete o ruta" },
+  { label: "⬆️ Actualizar", hint: "elegir uno" },
+  { label: "⏫ Actualizar todo", hint: "del ámbito" },
+  { label: "🗑️ Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
+  { label: "↩️ Volver" },
 ];
 
 export async function runMenu(out: Output): Promise<number> {
@@ -147,9 +147,9 @@ async function pluginMenu(out: Output): Promise<void> {
 }
 
 async function addRemote(out: Output): Promise<void> {
-  const name = await ask("Nombre del servidor", { required: true });
-  const url = await ask("URL del endpoint MCP", { required: true });
-  const headers = await ask("Cabeceras K=V separadas por coma (opcional)", { required: false });
+  const name = await ask("Nombre", { required: true });
+  const url = await ask("URL", { required: true });
+  const headers = await ask("Cabeceras K=V (opcional)", { required: false });
   const oauth = await confirm("¿Permitir OAuth?", false).then(
     () => true,
     () => false,
@@ -168,9 +168,9 @@ async function addRemote(out: Output): Promise<void> {
 }
 
 async function addLocal(out: Output): Promise<void> {
-  const name = await ask("Nombre del servidor", { required: true });
-  const command = await ask("Comando (ej: npx -y @modelcontextprotocol/server-everything)", { required: true });
-  const env = await ask("Variables K=V separadas por coma (opcional)", { required: false });
+  const name = await ask("Nombre", { required: true });
+  const command = await ask("Comando", { required: true });
+  const env = await ask("Variables K=V (opcional)", { required: false });
   const scope = await askScope();
   const parsed = from({
     positionals: [name],
@@ -190,8 +190,8 @@ async function toggleMcp(out: Output): Promise<void> {
     return;
   }
   const index = await select(
-    "Elige servidor",
-    [...views.map((v) => `${v.name} (${mcpType(v)}, ${mcpStatus(v)}, ${v.scope})`), "Cancelar"],
+    "Servidor",
+    [...views.map((v) => `${v.name}  ·  ${mcpStatus(v)}  ·  ${v.scope}`), "Cancelar"],
   );
   if (index === -1 || index === views.length) return;
   const view = views[index];
@@ -208,7 +208,7 @@ async function showMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await select("Elige servidor", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
+  const index = await select("Servidor", [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   await cmdMcpShow(from({ positionals: [views[index].name], flags: new Map([["scope", [views[index].scope]]]) }), out);
 }
@@ -219,14 +219,14 @@ async function removeMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await select("Elige servidor a eliminar", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
+  const index = await select("Eliminar", [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   const view = views[index];
   await cmdMcpRemove(from({ positionals: [view.name], flags: new Map([["scope", [view.scope]]]) }), out);
 }
 
 async function addPlugin(out: Output): Promise<void> {
-  const spec = await ask("Paquete o ruta (ej: opencode-acme-plugin@1.2.0)", { required: true });
+  const spec = await ask("Paquete o ruta", { required: true });
   const scope = await askScope();
   await cmdPluginAdd(from({ positionals: [spec], flags: new Map([["scope", [scope]]]) }), out);
 }
@@ -242,7 +242,7 @@ async function updatePlugin(out: Output, all: boolean): Promise<void> {
       out.info("No hay plugins en ese ámbito.");
       return;
     }
-    const index = await select("Plugin a actualizar", [...names, "Cancelar"]);
+    const index = await select("Actualizar", [...names, "Cancelar"]);
     if (index === -1 || index === names.length) return;
     parsed.positionals = [names[index]];
   } else {
@@ -262,8 +262,8 @@ async function removePlugin(out: Output): Promise<void> {
     return;
   }
   const index = await select(
-    "Plugin a eliminar",
-    [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"],
+    "Eliminar",
+    [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"],
   );
   if (index === -1 || index === views.length) return;
   const view = views[index];
@@ -325,7 +325,7 @@ export function splitCommand(command: string): string[] {
 }
 
 function section(out: Output, title: string): void {
-  process.stderr.write(`\n${out.paint("bold", title)}\n`);
+  process.stderr.write(`\n${out.paint("cyan", out.paint("bold", title))}\n`);
 }
 
 function report(error: unknown): void {
@@ -338,11 +338,8 @@ function report(error: unknown): void {
 }
 
 const HELP_TEXT = `
-Comandos directos (sin menú):
-  ./start.sh list                Lista MCP y plugins
-  ./start.sh mcp add ...         Añade un servidor MCP
-  ./start.sh plugin add ...      Añade un plugin
-  ./start.sh doctor              Diagnóstico
-  ./start.sh reload              Reinicia opencode
-  ./start.sh --help              Ayuda completa
+Directo (sin menú):
+  list  mcp add|list|show|remove  plugin add|list|remove|update
+  doctor  reload  config path
+  ./start.sh --help  → ayuda completa
 `;

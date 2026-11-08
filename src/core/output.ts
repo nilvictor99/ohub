@@ -10,8 +10,10 @@ const codes = {
   dim: "\u001b[2m",
   bold: "\u001b[1m",
   red: "\u001b[31m",
-  yellow: "\u001b[33m",
   green: "\u001b[32m",
+  yellow: "\u001b[33m",
+  cyan: "\u001b[36m",
+  magenta: "\u001b[35m",
   reset: "\u001b[0m",
 } as const;
 
@@ -62,8 +64,23 @@ export class Output {
         .map((cell, index) => cell.padEnd(widths[index]))
         .join("  ")
         .trimEnd();
-    process.stdout.write(`${this.paint("dim", line(headers.map((h) => h.toUpperCase())))}\n`);
-    for (const row of rows) process.stdout.write(`${line(row)}\n`);
+    process.stdout.write(`${this.paint("cyan", this.paint("bold", line(headers.map((h) => h.toUpperCase()))))}\n`);
+    for (const row of rows) {
+      const decorated = row.map((cell, index) => {
+        const padded = cell.padEnd(widths[index]);
+        const kind = this.cellKind(cell);
+        if (kind) return this.paint(kind, padded);
+        return index === 0 ? this.paint("bold", padded) : padded;
+      });
+      process.stdout.write(`${line(decorated)}\n`);
+    }
+  }
+
+  private cellKind(cell: string): keyof typeof codes | undefined {
+    if (/^(enabled|enabled\b)/.test(cell)) return "green";
+    if (/^(disabled|disabled\b)/.test(cell)) return "red";
+    if (/floating|shadowed/.test(cell)) return "dim";
+    return undefined;
   }
 }
 
