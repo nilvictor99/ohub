@@ -16,10 +16,10 @@ import { resolveTarget } from "../core/paths.ts";
 import { renderBanner } from "./banner.ts";
 
 const MAIN = [
-  { icon: "🖥️", label: "Servidores MCP", hint: "añadir, activar, eliminar" },
+  { icon: "📡", label: "Servidores MCP", hint: "añadir, activar, eliminar" },
   { icon: "🔌", label: "Plugins", hint: "añadir, actualizar, eliminar" },
   { icon: "🩺", label: "Diagnóstico", hint: "revisa config" },
-  { icon: "🗺️", label: "Rutas", hint: "global, proyecto" },
+  { icon: "📍", label: "Rutas", hint: "global, proyecto" },
   { icon: "🔄", label: "Reiniciar", hint: "aplica cambios" },
   { icon: "💡", label: "Ayuda", hint: "comandos" },
   { icon: "🚪", label: "Salir" },
@@ -31,7 +31,7 @@ const MCP_MENU = [
   { icon: "💻", label: "Local", hint: "comando" },
   { icon: "🔁", label: "Alternar", hint: "activo o inactivo" },
   { icon: "🔍", label: "Detalle", hint: "ver ficha" },
-  { icon: "×", label: "Eliminar", hint: "pide confirmación" },
+  { icon: "🚫", label: "Eliminar", hint: "pide confirmación" },
   { icon: "🔙", label: "Volver" },
 ];
 
@@ -40,7 +40,7 @@ const PLUGIN_MENU = [
   { icon: "➕", label: "Añadir", hint: "paquete o ruta" },
   { icon: "🚀", label: "Actualizar", hint: "elegir uno" },
   { icon: "🔄", label: "Actualizar todo", hint: "del ámbito" },
-  { icon: "×", label: "Eliminar", hint: "pide confirmación" },
+  { icon: "🚫", label: "Eliminar", hint: "pide confirmación" },
   { icon: "🔙", label: "Volver" },
 ];
 
