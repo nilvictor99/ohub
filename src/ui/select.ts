@@ -21,11 +21,8 @@ const PALETTE = [
   "\u001b[33m", // yellow
   "\u001b[35m", // magenta
   "\u001b[34m", // blue
-  "\u001b[35m",
+  "\u001b[31m", // red
 ];
-
-const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-const SPINNER_ASCII = ["|", "/", "-", "\\"];
 
 function supportsUnicode(): boolean {
   if (process.env.OHUB_ASCII) return false;
@@ -48,13 +45,11 @@ export async function select(
   const reset = "\u001b[0m";
   const dim = "\u001b[2m";
   const bold = "\u001b[1m";
-  const reverse = "\u001b[7m";
+  const cyan = "\u001b[36m";
   const pointer = supportsUnicode() ? "❯" : ">";
-  const spinner = supportsUnicode() ? SPINNER : SPINNER_ASCII;
   const footer = config.footer ?? "↑/↓ mover · Enter elegir · q salir";
   let index = clamp(config.initial ?? 0, 0, items.length - 1);
   let rendered = 0;
-  let frame = 0;
 
   const width = Math.max(
     ...items.map((item) => item.label.length + (item.hint ? item.hint.length + 4 : 0)),
@@ -64,41 +59,26 @@ export async function select(
     Math.max(20, (process.stdout.columns ?? 80) - 2),
   );
 
-  const footerLine = () => {
-    const mark = spinner[frame % spinner.length];
-    if (!color) return `  ${footer} ${mark}`;
-    return `${dim}  ${footer} ${reset}${ESC}36m${mark}${reset}`;
-  };
-
-  process.stderr.write(`${color ? `${bold}${ESC}36m${question}${reset}` : question}\n`);
-  process.stderr.write(`${footerLine()}\n`);
+  process.stderr.write(`${color ? `${bold}${cyan}${question}${reset}` : question}\n`);
+  process.stderr.write(`${color ? `${dim}  ${footer}${reset}` : `  ${footer}`}\n`);
 
   const draw = () => {
     if (rendered > 0) process.stderr.write(`${ESC}${rendered}A`);
     for (let i = 0; i < items.length; i += 1) {
       const item = items[i];
       const selected = i === index;
-      const hue = item.color ?? PALETTE[i % PALETTE.length];
+      const hue = selected ? cyan : (item.color ?? PALETTE[i % PALETTE.length]);
       const marker = selected ? `${pointer} ` : "  ";
       const hintText = item.hint ? `  ${item.hint}` : "";
       const visible = `${marker}${item.label}${hintText}`;
       const pad = " ".repeat(Math.max(0, lineWidth - visible.length));
-      let line: string;
-      if (selected) {
-        line = color ? `${reverse}${bold}${hue}${visible}${pad}${reset}` : `${visible}${pad}`;
-      } else {
-        const hint = hintText ? `${dim}${hintText}${pad}${reset}` : pad;
-        line = color ? `${hue}${marker}${item.label}${reset}${hint}` : `${visible}${pad}`;
-      }
+      const style = selected ? `${hue}${bold}` : hue;
+      const line = color
+        ? `${style}${marker}${item.label}${reset}${hintText ? `${dim}${hintText}${pad}${reset}` : pad}`
+        : `${visible}${pad}`;
       process.stderr.write(`${ESC}2K${line}\n`);
     }
     rendered = items.length;
-  };
-
-  const drawFooter = () => {
-    if (rendered === 0) return;
-    process.stderr.write(`${ESC}${rendered + 1}A${ESC}2K${footerLine()}`);
-    process.stderr.write(`${ESC}${rendered + 1}B`);
   };
 
   process.stderr.write(`${ESC}?25l`);
@@ -108,13 +88,7 @@ export async function select(
   draw();
 
   return new Promise<number>((resolve) => {
-    const timer = setInterval(() => {
-      frame += 1;
-      drawFooter();
-    }, 140);
-
     const cleanup = () => {
-      clearInterval(timer);
       process.stdin.off("keypress", onKey);
       process.stdin.setRawMode(false);
       process.stdin.pause();
@@ -124,12 +98,12 @@ export async function select(
     const finish = (value: number) => {
       cleanup();
       if (value < 0) {
-        process.stderr.write(`${dim}  cancelado${reset}\n`);
+        process.stderr.write(`${color ? `${dim}  cancelado${reset}` : "  cancelado"}\n`);
       } else {
         const item = items[value];
-        const hint = item.hint ? `${dim}  ${item.hint}${reset}` : "";
+        const hint = item.hint ? `${color ? `${dim}  ${item.hint}${reset}` : `  ${item.hint}`}` : "";
         const hue = item.color ?? PALETTE[value % PALETTE.length];
-        const mark = color ? `${ESC}32m${pointer}${reset} ` : `${pointer} `;
+        const mark = color ? `${cyan}${bold}${pointer}${reset} ` : `${pointer} `;
         process.stderr.write(`${mark}${color ? `${bold}${hue}${item.label}${reset}` : item.label}${hint}\n`);
       }
       resolve(value);

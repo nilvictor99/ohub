@@ -45,7 +45,7 @@ El bootstrap muestra cinco etapas con un único indicador, guarda la salida inte
 - Gestionar plugins: listar, añadir, actualizar uno, actualizar todos, eliminar.
 - Diagnóstico, rutas de configuración, reinicio del servicio y ayuda.
 
-Navegación: flechas ↑/↓ o `k`/`j`, `Enter` para elegir, `1`-`9` como atajo, `q` o `Esc` para volver, `Ctrl+C` para interrumpir. La opción seleccionada se dibuja como barra invertida; cada opción lleva color e icono propios, y las pistas aparecen atenuadas junto al texto.
+Navegación: flechas ↑/↓ o `k`/`j`, `Enter` para elegir, `1`-`9` como atajo, `q` o `Esc` para volver, `Ctrl+C` para interrumpir. La selección se marca solo con color (cian en negrita más el cursor `❯`); cada opción mantiene su color e icono propios y las pistas van atenuadas.
 
 Toda acción destructiva pide confirmación. Los flags directos siguen disponibles para scripts. El menú no depende de dependencias nuevas: raw mode + keypress de Node/Bun.
 
@@ -180,9 +180,7 @@ Sale con código 1 si hay errores.
 }
 ```
 
-Estilos: `box-drawing`, `simple-lines`, `header`. Temas: `default`, `tech`, `fire`, `ocean`, `forest`, `neon`, `minimal`; cada tema define color de borde, título y subtítulo. Sin Unicode (`OHUB_ASCII=1`) cae a ASCII. Sin TTY o con `NO_COLOR` no usa color.
-
-Las tablas también se pintan: cabecera en cian, estados `enabled` en verde, `disabled` en rojo y `floating`/`shadowed` atenuados.
+Estilos: `box-drawing`, `simple-lines`, `header`. Temas: `default`, `tech`, `fire`, `ocean`, `forest`, `neon`, `minimal`. Sin Unicode (`OHUB_ASCII=1`) cae a ASCII. Sin TTY o con `NO_COLOR` no usa color.
 
 ## Limitaciones
 

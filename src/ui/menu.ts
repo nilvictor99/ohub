@@ -325,7 +325,7 @@ export function splitCommand(command: string): string[] {
 }
 
 function section(out: Output, title: string): void {
-  process.stderr.write(`\n${out.paint("cyan", out.paint("bold", title))}\n`);
+  process.stderr.write(`\n${out.paint("bold", title)}\n`);
 }
 
 function report(error: unknown): void {
