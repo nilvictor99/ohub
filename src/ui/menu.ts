@@ -16,10 +16,10 @@ import { resolveTarget } from "../core/paths.ts";
 import { renderBanner } from "./banner.ts";
 
 const MAIN = [
-  { label: "🖥️ Servidores MCP", hint: "añadir · activar · eliminar" },
-  { label: "🔌 Plugins", hint: "añadir · actualizar · eliminar" },
+  { label: "🖥️ Servidores MCP", hint: "añadir, activar, eliminar" },
+  { label: "🔌 Plugins", hint: "añadir, actualizar, eliminar" },
   { label: "🩺 Diagnóstico", hint: "revisa config" },
-  { label: "🗺️ Rutas", hint: "global · proyecto" },
+  { label: "🗺️ Rutas", hint: "global, proyecto" },
   { label: "🔄 Reiniciar", hint: "aplica cambios" },
   { label: "❓ Ayuda", hint: "comandos" },
   { label: "🚪 Salir" },
@@ -29,7 +29,7 @@ const MCP_MENU = [
   { label: "📋 Listar", hint: "todos" },
   { label: "🌐 Remoto", hint: "por URL" },
   { label: "💻 Local", hint: "comando" },
-  { label: "🔁 Alternar", hint: "activo/inactivo" },
+  { label: "🔁 Alternar", hint: "activo o inactivo" },
   { label: "🔍 Detalle", hint: "ver ficha" },
   { label: "🗑️ Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
   { label: "↩️ Volver" },
@@ -191,7 +191,7 @@ async function toggleMcp(out: Output): Promise<void> {
   }
   const index = await select(
     "Servidor",
-    [...views.map((v) => `${v.name}  ·  ${mcpStatus(v)}  ·  ${v.scope}`), "Cancelar"],
+    [...views.map((v) => `${v.name}, ${mcpStatus(v)}, ${v.scope}`), "Cancelar"],
   );
   if (index === -1 || index === views.length) return;
   const view = views[index];
@@ -208,7 +208,7 @@ async function showMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await select("Servidor", [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"]);
+  const index = await select("Servidor", [...views.map((v) => `${v.name}, ${v.scope}`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   await cmdMcpShow(from({ positionals: [views[index].name], flags: new Map([["scope", [views[index].scope]]]) }), out);
 }
@@ -219,7 +219,7 @@ async function removeMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await select("Eliminar", [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"]);
+  const index = await select("Eliminar", [...views.map((v) => `${v.name}, ${v.scope}`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   const view = views[index];
   await cmdMcpRemove(from({ positionals: [view.name], flags: new Map([["scope", [view.scope]]]) }), out);
@@ -263,7 +263,7 @@ async function removePlugin(out: Output): Promise<void> {
   }
   const index = await select(
     "Eliminar",
-    [...views.map((v) => `${v.name}  ·  ${v.scope}`), "Cancelar"],
+    [...views.map((v) => `${v.name}, ${v.scope}`), "Cancelar"],
   );
   if (index === -1 || index === views.length) return;
   const view = views[index];

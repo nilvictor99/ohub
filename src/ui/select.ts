@@ -40,7 +40,7 @@ export async function select(
   const dim = "\u001b[2m";
   const bold = "\u001b[1m";
   const cyan = "\u001b[36m";
-  const footer = config.footer ?? "↑/↓ mover · Enter elegir · q salir";
+  const footer = config.footer ?? "flechas para mover, Enter para elegir, q para salir";
   let index = clamp(config.initial ?? 0, 0, items.length - 1);
   let rendered = 0;
 
