@@ -66,3 +66,10 @@ describe("estado portable", () => {
     else process.env.OHUB_STATE_HOME = previous;
   });
 });
+
+describe("select", () => {
+  test("exige TTY cuando no hay terminal", async () => {
+    const { select } = await import("../src/ui/select.ts");
+    await expect(select("¿?", ["a", "b"])).rejects.toThrow();
+  });
+});

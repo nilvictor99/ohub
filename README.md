@@ -45,6 +45,8 @@ El bootstrap muestra cinco etapas con un único indicador, guarda la salida inte
 - Gestionar plugins: listar, añadir, actualizar uno, actualizar todos, eliminar.
 - Diagnóstico, rutas de configuración, reinicio del servicio y ayuda.
 
+Navegación: flechas ↑/↓ o `k`/`j`, `Enter` para elegir, `1`-`9` como atajo, `q` o `Esc` para volver, `Ctrl+C` para interrumpir. La opción resaltada se dibuja como barra invertida, sin numeración obligatoria.
+
 Toda acción destructiva pide confirmación. Los flags directos siguen disponibles para scripts.
 
 ## Estructura

@@ -1,5 +1,6 @@
-import { choose, ask, pause } from "../core/prompt.ts";
+import { ask, pause } from "../core/prompt.ts";
 import { confirm } from "../core/prompt.ts";
+import { select } from "./select.ts";
 import { EXIT, OhubError } from "../core/errors.ts";
 import type { Output } from "../core/output.ts";
 import type { Parsed } from "../core/args.ts";
@@ -15,13 +16,13 @@ import { resolveTarget } from "../core/paths.ts";
 import { renderBanner } from "./banner.ts";
 
 const MAIN = [
-  "Gestionar servidores MCP",
-  "Gestionar plugins",
-  "Diagnóstico (doctor)",
-  "Rutas de configuración",
-  "Reiniciar servicio de opencode",
-  "Ayuda",
-  "Salir",
+  { label: "Gestionar servidores MCP", hint: "añadir · activar · eliminar" },
+  { label: "Gestionar plugins", hint: "añadir · actualizar · eliminar" },
+  { label: "Diagnóstico (doctor)", hint: "revisa la configuración" },
+  { label: "Rutas de configuración", hint: "global y proyecto" },
+  { label: "Reiniciar servicio de opencode", hint: "aplica los cambios" },
+  { label: "Ayuda", hint: "comandos directos" },
+  { label: "Salir" },
 ];
 
 const MCP_MENU = [
@@ -30,7 +31,7 @@ const MCP_MENU = [
   "Añadir servidor local",
   "Activar / desactivar",
   "Ver detalle",
-  "Eliminar servidor",
+  { label: "Eliminar servidor", hint: "pide confirmación" },
   "Volver",
 ];
 
@@ -39,7 +40,7 @@ const PLUGIN_MENU = [
   "Añadir plugin",
   "Actualizar un plugin",
   "Actualizar todos",
-  "Eliminar plugin",
+  { label: "Eliminar plugin", hint: "pide confirmación" },
   "Volver",
 ];
 
@@ -47,7 +48,7 @@ export async function runMenu(out: Output): Promise<number> {
   process.stderr.write(`${renderBanner()}\n`);
   for (;;) {
     process.stderr.write("\n");
-    const choice = await choose("Menú principal", MAIN);
+    const choice = await select("Menú principal", MAIN);
     try {
       switch (choice) {
         case 0:
@@ -85,7 +86,7 @@ export async function runMenu(out: Output): Promise<number> {
 async function mcpMenu(out: Output): Promise<void> {
   for (;;) {
     section(out, "MCP");
-    const choice = await choose("Servidores MCP", MCP_MENU);
+    const choice = await select("Servidores MCP", MCP_MENU);
     if (choice === 6 || choice === -1) return;
     try {
       switch (choice) {
@@ -118,7 +119,7 @@ async function mcpMenu(out: Output): Promise<void> {
 async function pluginMenu(out: Output): Promise<void> {
   for (;;) {
     section(out, "Plugins");
-    const choice = await choose("Plugins", PLUGIN_MENU);
+    const choice = await select("Plugins", PLUGIN_MENU);
     if (choice === 5 || choice === -1) return;
     try {
       switch (choice) {
@@ -188,7 +189,7 @@ async function toggleMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await choose(
+  const index = await select(
     "Elige servidor",
     [...views.map((v) => `${v.name} (${mcpType(v)}, ${mcpStatus(v)}, ${v.scope})`), "Cancelar"],
   );
@@ -207,7 +208,7 @@ async function showMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await choose("Elige servidor", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
+  const index = await select("Elige servidor", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   await cmdMcpShow(from({ positionals: [views[index].name], flags: new Map([["scope", [views[index].scope]]]) }), out);
 }
@@ -218,7 +219,7 @@ async function removeMcp(out: Output): Promise<void> {
     out.info("No hay servidores MCP configurados.");
     return;
   }
-  const index = await choose("Elige servidor a eliminar", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
+  const index = await select("Elige servidor a eliminar", [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"]);
   if (index === -1 || index === views.length) return;
   const view = views[index];
   await cmdMcpRemove(from({ positionals: [view.name], flags: new Map([["scope", [view.scope]]]) }), out);
@@ -241,7 +242,7 @@ async function updatePlugin(out: Output, all: boolean): Promise<void> {
       out.info("No hay plugins en ese ámbito.");
       return;
     }
-    const index = await choose("Plugin a actualizar", [...names, "Cancelar"]);
+    const index = await select("Plugin a actualizar", [...names, "Cancelar"]);
     if (index === -1 || index === names.length) return;
     parsed.positionals = [names[index]];
   } else {
@@ -260,7 +261,7 @@ async function removePlugin(out: Output): Promise<void> {
     out.info("No hay plugins configurados.");
     return;
   }
-  const index = await choose(
+  const index = await select(
     "Plugin a eliminar",
     [...views.map((v) => `${v.name} (${v.scope})`), "Cancelar"],
   );
@@ -273,7 +274,7 @@ async function removePlugin(out: Output): Promise<void> {
 }
 
 async function askScope(): Promise<"project" | "global"> {
-  const index = await choose("Ámbito", ["Proyecto actual", "Global (usuario)"]);
+  const index = await select("Ámbito", ["Proyecto actual", "Global (usuario)"]);
   return index === 1 ? "global" : "project";
 }
 
