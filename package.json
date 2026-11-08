@@ -1,0 +1,16 @@
+{
+  "name": "ohub",
+  "version": "0.1.0",
+  "description": "OpenCode extension hub: manage MCP servers, plugins and skills from one CLI",
+  "type": "module",
+  "bin": { "ohub": "./dist/ohub" },
+  "scripts": {
+    "dev": "bun run src/cli.ts",
+    "build": "bun build --compile --outfile dist/ohub src/cli.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": { "jsonc-parser": "^3.3.1" },
+  "devDependencies": { "@types/bun": "latest", "typescript": "^5.7.0" },
+  "license": "MIT"
+}
