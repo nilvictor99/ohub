@@ -24,12 +24,6 @@ const PALETTE = [
   "\u001b[31m", // red
 ];
 
-function supportsUnicode(): boolean {
-  if (process.env.OHUB_ASCII) return false;
-  const locale = process.env.LC_ALL ?? process.env.LC_CTYPE ?? process.env.LANG ?? "";
-  return /utf-?8/i.test(locale) || (process.platform === "linux" && !process.env.NO_UNICODE);
-}
-
 export async function select(
   question: string,
   options: Array<string | SelectItem>,
@@ -46,7 +40,6 @@ export async function select(
   const dim = "\u001b[2m";
   const bold = "\u001b[1m";
   const cyan = "\u001b[36m";
-  const pointer = supportsUnicode() ? "❯" : ">";
   const footer = config.footer ?? "↑/↓ mover · Enter elegir · q salir";
   let index = clamp(config.initial ?? 0, 0, items.length - 1);
   let rendered = 0;
@@ -68,13 +61,12 @@ export async function select(
       const item = items[i];
       const selected = i === index;
       const hue = selected ? cyan : (item.color ?? PALETTE[i % PALETTE.length]);
-      const marker = selected ? `${pointer} ` : "  ";
       const hintText = item.hint ? `  ${item.hint}` : "";
-      const visible = `${marker}${item.label}${hintText}`;
+      const visible = `${item.label}${hintText}`;
       const pad = " ".repeat(Math.max(0, lineWidth - visible.length));
       const style = selected ? `${hue}${bold}` : hue;
       const line = color
-        ? `${style}${marker}${item.label}${reset}${hintText ? `${dim}${hintText}${pad}${reset}` : pad}`
+        ? `${style}${item.label}${reset}${hintText ? `${dim}${hintText}${pad}${reset}` : pad}`
         : `${visible}${pad}`;
       process.stderr.write(`${ESC}2K${line}\n`);
     }
@@ -103,8 +95,7 @@ export async function select(
         const item = items[value];
         const hint = item.hint ? `${color ? `${dim}  ${item.hint}${reset}` : `  ${item.hint}`}` : "";
         const hue = item.color ?? PALETTE[value % PALETTE.length];
-        const mark = color ? `${cyan}${bold}${pointer}${reset} ` : `${pointer} `;
-        process.stderr.write(`${mark}${color ? `${bold}${hue}${item.label}${reset}` : item.label}${hint}\n`);
+        process.stderr.write(`${color ? `${bold}${hue}${item.label}${reset}` : item.label}${hint}\n`);
       }
       resolve(value);
     };
