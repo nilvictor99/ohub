@@ -31,7 +31,7 @@ const MCP_MENU = [
   { label: "💻 Local", hint: "comando" },
   { label: "🔁 Alternar", hint: "activo o inactivo" },
   { label: "🔍 Detalle", hint: "ver ficha" },
-  { label: "❌ Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
+  { label: "×  Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
   { label: "🔙 Volver" },
 ];
 
@@ -40,7 +40,7 @@ const PLUGIN_MENU = [
   { label: "➕ Añadir", hint: "paquete o ruta" },
   { label: "🚀 Actualizar", hint: "elegir uno" },
   { label: "🔄 Actualizar todo", hint: "del ámbito" },
-  { label: "❌ Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
+  { label: "×  Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
   { label: "🔙 Volver" },
 ];
 
