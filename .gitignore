@@ -1,4 +1,8 @@
 node_modules/
 dist/
+bin/
+data/
+.logs/
+.bootstrap.done
 *.tmp
 *.ohub.lock

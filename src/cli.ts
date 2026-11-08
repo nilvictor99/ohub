@@ -41,6 +41,7 @@ Opciones globales:
   -q, --quiet                  Solo datos
   -y, --yes                    No pedir confirmación
   --dry-run                    Simular sin escribir
+  --menu                       Abre el menú interactivo (requiere TTY)
   -h, --help                   Ayuda
   -v, --version                Versión
 
@@ -95,7 +96,7 @@ async function main(argv: string[]): Promise<number> {
     return EXIT.OK;
   }
   if (parsed.positionals.length === 0) {
-    if (process.stdin.isTTY && process.stdout.isTTY) return runMenu(out, dispatch);
+    if (process.stdin.isTTY && process.stdout.isTTY) return runMenu(out);
     process.stdout.write(`${HELP}\n`);
     return EXIT.OK;
   }

@@ -13,6 +13,8 @@ export function globalConfigDir(): string {
 }
 
 export function stateDir(): string {
+  const override = process.env.OHUB_STATE_HOME;
+  if (override) return resolve(override);
   const xdg = process.env.XDG_STATE_HOME;
   return xdg ? join(xdg, "ohub") : join(home(), ".local", "state", "ohub");
 }
