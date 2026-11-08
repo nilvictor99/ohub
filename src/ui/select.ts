@@ -34,6 +34,7 @@ export async function select(
   const bold = "\u001b[1m";
   const cyan = "\u001b[36m";
   const footer = config.footer ?? "flechas para mover, Enter para elegir, q para salir";
+  const plain = Boolean(process.env.OHUB_ASCII);
   let index = clamp(config.initial ?? 0, 0, items.length - 1);
   let rendered = 0;
 
@@ -41,12 +42,19 @@ export async function select(
   const columns = Math.max(20, reported > 0 ? reported : 80);
   const indent = "  ";
   const gap = 2;
-  const iconWidth = Math.max(...items.map((item) => cellWidth(item.icon ?? "")));
+  const iconOf = (item: SelectItem) => (plain ? "" : item.icon ?? "");
+  const iconWidth = Math.max(...items.map((item) => cellWidth(iconOf(item))));
+  const iconGap = iconWidth > 0 ? 1 : 0;
   const labelWidth = Math.max(...items.map((item) => cellWidth(item.label)));
-  const hintBudget = Math.max(0, columns - indent.length - iconWidth - 1 - labelWidth - gap);
+  const hintBudget = Math.max(0, columns - indent.length - iconWidth - iconGap - labelWidth - gap);
+
+  const iconCellFor = (item: SelectItem): string => {
+    if (iconWidth === 0) return "";
+    return `${padTo(iconOf(item), iconWidth)} `;
+  };
 
   const row = (item: SelectItem, selected: boolean): string => {
-    const iconCell = `${padTo(item.icon ?? "", iconWidth)} `;
+    const iconCell = iconCellFor(item);
     const hint = item.hint ? truncate(item.hint, hintBudget) : "";
     if (!hint) {
       const label = selected && color ? `${cyan}${bold}${item.label}${reset}` : item.label;
@@ -90,7 +98,7 @@ export async function select(
         process.stderr.write(`${color ? `${dim}  cancelado${reset}` : "  cancelado"}\n`);
       } else {
         const item = items[value];
-        const iconCell = `${padTo(item.icon ?? "", iconWidth)} `;
+        const iconCell = iconCellFor(item);
         const hint = item.hint ? truncate(item.hint, hintBudget) : "";
         const label = color ? `${cyan}${bold}${item.label}${reset}` : item.label;
         const pad = hint ? " ".repeat(labelWidth - cellWidth(item.label)) + " ".repeat(gap) : "";
