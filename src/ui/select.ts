@@ -44,31 +44,31 @@ export async function select(
   let index = clamp(config.initial ?? 0, 0, items.length - 1);
   let rendered = 0;
 
-  const width = Math.max(
-    ...items.map((item) => item.label.length + (item.hint ? item.hint.length + 4 : 0)),
-  );
-  const lineWidth = Math.min(
-    Math.max(width + 4, 24),
-    Math.max(20, (process.stdout.columns ?? 80) - 2),
-  );
+  const reported = process.stdout.columns ?? 0;
+  const columns = Math.max(20, reported > 0 ? reported : 80);
+  const indent = "  ";
+  const gap = 2;
+  const labelWidth = Math.max(...items.map((item) => cellWidth(item.label)));
+  const hintBudget = Math.max(0, columns - 1 - indent.length - labelWidth - gap);
+
+  const row = (item: SelectItem, position: number, selected: boolean) => {
+    const hue = selected ? cyan : (item.color ?? PALETTE[position % PALETTE.length]);
+    const style = selected ? `${hue}${bold}` : hue;
+    const padding = " ".repeat(labelWidth - cellWidth(item.label) + gap);
+    const hint = item.hint ? truncate(item.hint, hintBudget) : "";
+    const hintPart = hint ? `${dim}${hint}${reset}` : "";
+    const plain = `${indent}${item.label}${padding}${hint}`;
+    if (!color) return plain;
+    return `${indent}${style}${item.label}${reset}${padding}${hintPart}`;
+  };
 
   process.stderr.write(`${color ? `${bold}${cyan}${question}${reset}` : question}\n`);
-  process.stderr.write(`${color ? `${dim}  ${footer}${reset}` : `  ${footer}`}\n`);
+  process.stderr.write(`${color ? `${dim}${indent}${footer}${reset}` : `${indent}${footer}`}\n`);
 
   const draw = () => {
     if (rendered > 0) process.stderr.write(`${ESC}${rendered}A`);
     for (let i = 0; i < items.length; i += 1) {
-      const item = items[i];
-      const selected = i === index;
-      const hue = selected ? cyan : (item.color ?? PALETTE[i % PALETTE.length]);
-      const hintText = item.hint ? `  ${item.hint}` : "";
-      const visible = `${item.label}${hintText}`;
-      const pad = " ".repeat(Math.max(0, lineWidth - visible.length));
-      const style = selected ? `${hue}${bold}` : hue;
-      const line = color
-        ? `${style}${item.label}${reset}${hintText ? `${dim}${hintText}${pad}${reset}` : pad}`
-        : `${visible}${pad}`;
-      process.stderr.write(`${ESC}2K${line}\n`);
+      process.stderr.write(`${ESC}2K${row(items[i], i, i === index)}\n`);
     }
     rendered = items.length;
   };
@@ -93,9 +93,13 @@ export async function select(
         process.stderr.write(`${color ? `${dim}  cancelado${reset}` : "  cancelado"}\n`);
       } else {
         const item = items[value];
-        const hint = item.hint ? `${color ? `${dim}  ${item.hint}${reset}` : `  ${item.hint}`}` : "";
         const hue = item.color ?? PALETTE[value % PALETTE.length];
-        process.stderr.write(`${color ? `${bold}${hue}${item.label}${reset}` : item.label}${hint}\n`);
+        const hint = item.hint ? truncate(item.hint, hintBudget) : "";
+        const padding = " ".repeat(labelWidth - cellWidth(item.label) + gap);
+        const hintPart = hint ? `${color ? `${dim}${hint}${reset}` : hint}` : "";
+        process.stderr.write(
+          `${color ? `${bold}${hue}${item.label}${reset}` : item.label}${padding}${hintPart}\n`,
+        );
       }
       resolve(value);
     };
@@ -152,4 +156,57 @@ export async function select(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function cellWidth(text: string): number {
+  let width = 0;
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code === 0xfe0f || code === 0x200d || code === 0x20e3) continue;
+    width += isWide(code) ? 2 : 1;
+  }
+  return width;
+}
+
+function isWide(code: number): boolean {
+  return (
+    (code >= 0x1100 && code <= 0x115f) ||
+    (code >= 0x2e80 && code <= 0xa4cf && code !== 0x303f) ||
+    (code >= 0xac00 && code <= 0xd7a3) ||
+    (code >= 0xf900 && code <= 0xfaff) ||
+    (code >= 0xfe30 && code <= 0xfe6f) ||
+    (code >= 0xff00 && code <= 0xff60) ||
+    (code >= 0xffe0 && code <= 0xffe6) ||
+    (code >= 0x1f300 && code <= 0x1faff) ||
+    (code >= 0x1f000 && code <= 0x1f2ff) ||
+    code === 0x231a ||
+    code === 0x231b ||
+    code === 0x2600 ||
+    code === 0x2614 ||
+    code === 0x2615 ||
+    code === 0x274c ||
+    code === 0x2753 ||
+    code === 0x2757 ||
+    code === 0x2795 ||
+    code === 0x2796 ||
+    code === 0x27b0 ||
+    code === 0x27bf ||
+    code === 0x2b1b ||
+    code === 0x2b50 ||
+    code === 0x2b55
+  );
+}
+
+function truncate(text: string, max: number): string {
+  if (max <= 0) return "";
+  if (cellWidth(text) <= max) return text;
+  let out = "";
+  let width = 0;
+  for (const char of text) {
+    const size = cellWidth(char);
+    if (width + size > max - 1) break;
+    out += char;
+    width += size;
+  }
+  return `${out}…`;
 }

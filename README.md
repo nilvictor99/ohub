@@ -45,7 +45,7 @@ El bootstrap muestra cinco etapas con un único indicador, guarda la salida inte
 - Gestionar plugins: listar, añadir, actualizar uno, actualizar todos, eliminar.
 - Diagnóstico, rutas de configuración, reinicio del servicio y ayuda.
 
-Navegación: flechas o `k`/`j`, `Enter` para elegir, `1`-`9` como atajo, `q` o `Esc` para volver, `Ctrl+C` para interrumpir. La selección se marca solo con color (cian en negrita). Cada opción lleva un único emoji y su color propio; las pistas van atenuadas y sin glifos decorativos.
+Navegación: flechas o `k`/`j`, `Enter` para elegir, `1`-`9` como atajo, `q` o `Esc` para volver, `Ctrl+C` para interrumpir. La selección se marca solo con color (cian en negrita). Cada opción lleva un único emoji y su color propio. Las etiquetas se miden en celdas de terminal (el emoji cuenta 2), así que las pistas empiezan siempre en la misma columna; van atenuadas y sin glifos decorativos.
 
 Toda acción destructiva pide confirmación. Los flags directos siguen disponibles para scripts. El menú no depende de dependencias nuevas: raw mode + keypress de Node/Bun.
 
