@@ -16,32 +16,32 @@ import { resolveTarget } from "../core/paths.ts";
 import { renderBanner } from "./banner.ts";
 
 const MAIN = [
-  { label: "🖥️ Servidores MCP", hint: "añadir, activar, eliminar" },
-  { label: "🔌 Plugins", hint: "añadir, actualizar, eliminar" },
-  { label: "🩺 Diagnóstico", hint: "revisa config" },
-  { label: "🗺️ Rutas", hint: "global, proyecto" },
-  { label: "🔄 Reiniciar", hint: "aplica cambios" },
-  { label: "❓ Ayuda", hint: "comandos" },
-  { label: "🚪 Salir" },
+  { icon: "🖥️", label: "Servidores MCP", hint: "añadir, activar, eliminar" },
+  { icon: "🔌", label: "Plugins", hint: "añadir, actualizar, eliminar" },
+  { icon: "🩺", label: "Diagnóstico", hint: "revisa config" },
+  { icon: "🗺️", label: "Rutas", hint: "global, proyecto" },
+  { icon: "🔄", label: "Reiniciar", hint: "aplica cambios" },
+  { icon: "💡", label: "Ayuda", hint: "comandos" },
+  { icon: "🚪", label: "Salir" },
 ];
 
 const MCP_MENU = [
-  { label: "📋 Listar", hint: "todos" },
-  { label: "🌐 Remoto", hint: "por URL" },
-  { label: "💻 Local", hint: "comando" },
-  { label: "🔁 Alternar", hint: "activo o inactivo" },
-  { label: "🔍 Detalle", hint: "ver ficha" },
-  { label: "×  Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
-  { label: "🔙 Volver" },
+  { icon: "📋", label: "Listar", hint: "todos" },
+  { icon: "🌐", label: "Remoto", hint: "por URL" },
+  { icon: "💻", label: "Local", hint: "comando" },
+  { icon: "🔁", label: "Alternar", hint: "activo o inactivo" },
+  { icon: "🔍", label: "Detalle", hint: "ver ficha" },
+  { icon: "×", label: "Eliminar", hint: "pide confirmación" },
+  { icon: "🔙", label: "Volver" },
 ];
 
 const PLUGIN_MENU = [
-  { label: "📋 Listar", hint: "instalados" },
-  { label: "➕ Añadir", hint: "paquete o ruta" },
-  { label: "🚀 Actualizar", hint: "elegir uno" },
-  { label: "🔄 Actualizar todo", hint: "del ámbito" },
-  { label: "×  Eliminar", hint: "pide confirmación", color: "\u001b[31m" },
-  { label: "🔙 Volver" },
+  { icon: "📋", label: "Listar", hint: "instalados" },
+  { icon: "➕", label: "Añadir", hint: "paquete o ruta" },
+  { icon: "🚀", label: "Actualizar", hint: "elegir uno" },
+  { icon: "🔄", label: "Actualizar todo", hint: "del ámbito" },
+  { icon: "×", label: "Eliminar", hint: "pide confirmación" },
+  { icon: "🔙", label: "Volver" },
 ];
 
 export async function runMenu(out: Output): Promise<number> {

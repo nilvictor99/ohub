@@ -5,7 +5,7 @@ import { colorEnabled } from "../core/output.ts";
 export interface SelectItem {
   label: string;
   hint?: string;
-  color?: string;
+  icon?: string;
 }
 
 export interface SelectOptions {
@@ -15,21 +15,14 @@ export interface SelectOptions {
 
 const ESC = "\u001b[";
 
-const PALETTE = [
-  "\u001b[36m", // cyan
-  "\u001b[32m", // green
-  "\u001b[33m", // yellow
-  "\u001b[35m", // magenta
-  "\u001b[34m", // blue
-  "\u001b[31m", // red
-];
-
 export async function select(
   question: string,
   options: Array<string | SelectItem>,
   config: SelectOptions = {},
 ): Promise<number> {
-  const items: SelectItem[] = options.map((item) => (typeof item === "string" ? { label: item } : item));
+  const items: SelectItem[] = options.map((item) =>
+    typeof item === "string" ? { label: item } : item,
+  );
   if (items.length === 0) return -1;
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     throw new OhubError(EXIT.USAGE, "El menú interactivo requiere una terminal (TTY)");
@@ -48,17 +41,19 @@ export async function select(
   const columns = Math.max(20, reported > 0 ? reported : 80);
   const indent = "  ";
   const gap = 2;
+  const iconWidth = Math.max(...items.map((item) => cellWidth(item.icon ?? "")));
   const labelWidth = Math.max(...items.map((item) => cellWidth(item.label)));
-  const hintBudget = Math.max(0, columns - 1 - indent.length - labelWidth - gap);
+  const hintBudget = Math.max(0, columns - indent.length - iconWidth - 1 - labelWidth - gap);
 
-  const row = (item: SelectItem, position: number, selected: boolean) => {
-    const hue = selected ? cyan : (item.color ?? PALETTE[position % PALETTE.length]);
-    const style = selected ? `${hue}${bold}` : hue;
-    if (!color) return `${indent}${item.label}${item.hint ? " ".repeat(labelWidth - cellWidth(item.label) + gap) + item.hint : ""}`;
-    if (!item.hint) return `${indent}${style}${item.label}${reset}`;
-    const padding = " ".repeat(labelWidth - cellWidth(item.label) + gap);
-    const hint = truncate(item.hint, hintBudget);
-    return `${indent}${style}${item.label}${reset}${padding}${dim}${hint}${reset}`;
+  const row = (item: SelectItem, selected: boolean): string => {
+    const icon = item.icon ?? "";
+    const iconCell = icon ? `${icon.padEnd(iconWidth)} ` : " ".repeat(iconWidth + 1);
+    const labelCell = item.label.padEnd(labelWidth);
+    const head = `${indent}${iconCell}`;
+    const label = selected && color ? `${cyan}${bold}${item.label}${reset}${labelCell.slice(item.label.length)}` : labelCell;
+    const hint = item.hint ? truncate(item.hint, hintBudget) : "";
+    const hintCell = hint ? `${" ".repeat(gap)}${color ? `${dim}${hint}${reset}` : hint}` : "";
+    return `${head}${label}${hintCell}`;
   };
 
   process.stderr.write(`${color ? `${bold}${cyan}${question}${reset}` : question}\n`);
@@ -67,7 +62,7 @@ export async function select(
   const draw = () => {
     if (rendered > 0) process.stderr.write(`${ESC}${rendered}A`);
     for (let i = 0; i < items.length; i += 1) {
-      process.stderr.write(`${ESC}2K${row(items[i], i, i === index)}\n`);
+      process.stderr.write(`${ESC}2K${row(items[i], i === index)}\n`);
     }
     rendered = items.length;
   };
@@ -92,13 +87,13 @@ export async function select(
         process.stderr.write(`${color ? `${dim}  cancelado${reset}` : "  cancelado"}\n`);
       } else {
         const item = items[value];
-        const hue = item.color ?? PALETTE[value % PALETTE.length];
-        const padding = item.hint ? " ".repeat(labelWidth - cellWidth(item.label) + gap) : "";
+        const icon = item.icon ?? "";
+        const iconCell = icon ? `${icon.padEnd(iconWidth)} ` : " ".repeat(iconWidth + 1);
         const hint = item.hint ? truncate(item.hint, hintBudget) : "";
-        const hintPart = hint ? `${color ? `${dim}${hint}${reset}` : hint}` : "";
-        process.stderr.write(
-          `${color ? `${bold}${hue}${item.label}${reset}` : item.label}${padding}${hintPart}\n`,
-        );
+        const hintCell = hint ? `${" ".repeat(gap)}${color ? `${dim}${hint}${reset}` : hint}` : "";
+        const label = color ? `${cyan}${bold}${item.label}${reset}` : item.label;
+        const pad = " ".repeat(Math.max(0, labelWidth - cellWidth(item.label)));
+        process.stderr.write(`${indent}${iconCell}${label}${pad}${hintCell}\n`);
       }
       resolve(value);
     };
@@ -177,22 +172,7 @@ function isWide(code: number): boolean {
     (code >= 0xff00 && code <= 0xff60) ||
     (code >= 0xffe0 && code <= 0xffe6) ||
     (code >= 0x1f300 && code <= 0x1faff) ||
-    (code >= 0x1f000 && code <= 0x1f2ff) ||
-    code === 0x231a ||
-    code === 0x231b ||
-    code === 0x2600 ||
-    code === 0x2614 ||
-    code === 0x2615 ||
-    code === 0x274c ||
-    code === 0x2753 ||
-    code === 0x2757 ||
-    code === 0x2795 ||
-    code === 0x2796 ||
-    code === 0x27b0 ||
-    code === 0x27bf ||
-    code === 0x2b1b ||
-    code === 0x2b50 ||
-    code === 0x2b55
+    (code >= 0x1f000 && code <= 0x1f2ff)
   );
 }
 
