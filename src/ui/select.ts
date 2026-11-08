@@ -46,14 +46,17 @@ export async function select(
   const hintBudget = Math.max(0, columns - indent.length - iconWidth - 1 - labelWidth - gap);
 
   const row = (item: SelectItem, selected: boolean): string => {
-    const icon = item.icon ?? "";
-    const iconCell = icon ? `${icon.padEnd(iconWidth)} ` : " ".repeat(iconWidth + 1);
-    const labelCell = item.label.padEnd(labelWidth);
-    const head = `${indent}${iconCell}`;
-    const label = selected && color ? `${cyan}${bold}${item.label}${reset}${labelCell.slice(item.label.length)}` : labelCell;
+    const iconCell = `${padTo(item.icon ?? "", iconWidth)} `;
     const hint = item.hint ? truncate(item.hint, hintBudget) : "";
-    const hintCell = hint ? `${" ".repeat(gap)}${color ? `${dim}${hint}${reset}` : hint}` : "";
-    return `${head}${label}${hintCell}`;
+    if (!hint) {
+      const label = selected && color ? `${cyan}${bold}${item.label}${reset}` : item.label;
+      return `${indent}${iconCell}${label}`;
+    }
+    const head = `${indent}${iconCell}`;
+    const label = selected && color
+      ? `${cyan}${bold}${item.label}${reset}${" ".repeat(labelWidth - cellWidth(item.label))}`
+      : padTo(item.label, labelWidth);
+    return `${head}${label}${" ".repeat(gap)}${color ? `${dim}${hint}${reset}` : hint}`;
   };
 
   process.stderr.write(`${color ? `${bold}${cyan}${question}${reset}` : question}\n`);
@@ -87,12 +90,11 @@ export async function select(
         process.stderr.write(`${color ? `${dim}  cancelado${reset}` : "  cancelado"}\n`);
       } else {
         const item = items[value];
-        const icon = item.icon ?? "";
-        const iconCell = icon ? `${icon.padEnd(iconWidth)} ` : " ".repeat(iconWidth + 1);
+        const iconCell = `${padTo(item.icon ?? "", iconWidth)} `;
         const hint = item.hint ? truncate(item.hint, hintBudget) : "";
-        const hintCell = hint ? `${" ".repeat(gap)}${color ? `${dim}${hint}${reset}` : hint}` : "";
         const label = color ? `${cyan}${bold}${item.label}${reset}` : item.label;
-        const pad = " ".repeat(Math.max(0, labelWidth - cellWidth(item.label)));
+        const pad = hint ? " ".repeat(labelWidth - cellWidth(item.label)) + " ".repeat(gap) : "";
+        const hintCell = hint ? `${color ? `${dim}${hint}${reset}` : hint}` : "";
         process.stderr.write(`${indent}${iconCell}${label}${pad}${hintCell}\n`);
       }
       resolve(value);
@@ -152,7 +154,12 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function cellWidth(text: string): number {
+function padTo(text: string, width: number): string {
+  const missing = width - cellWidth(text);
+  return missing > 0 ? `${text}${" ".repeat(missing)}` : text;
+}
+
+export function cellWidth(text: string): number {
   let width = 0;
   for (const char of text) {
     const code = char.codePointAt(0) ?? 0;

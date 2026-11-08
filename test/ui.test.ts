@@ -77,4 +77,13 @@ describe("select", () => {
     const { select } = await import("../src/ui/select.ts");
     await expect(select("¿?", [{ label: "x", icon: "×" }])).rejects.toThrow();
   });
+
+  test("mide emojis como 2 celdas y signos como 1", async () => {
+    const { cellWidth } = await import("../src/ui/select.ts");
+    expect(cellWidth("🖥️")).toBe(2);
+    expect(cellWidth("🗺️")).toBe(2);
+    expect(cellWidth("×")).toBe(1);
+    expect(cellWidth("Diagnóstico")).toBe(11);
+    expect(cellWidth("×  Eliminar")).toBe(11);
+  });
 });
