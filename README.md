@@ -182,6 +182,8 @@ Sale con código 1 si hay errores.
 
 Con `OHUB_ASCII=1` el menú omite los emojis y el banner usa ASCII plano, para terminales donde los iconos descuadran las columnas.
 
+Con `OHUB_EMOJI=1` se muestran los iconos de cada opción (por defecto están ocultos para garantizar alineación perfecta en cualquier terminal).
+
 Estilos: `box-drawing`, `simple-lines`, `header`. Temas: `default`, `tech`, `fire`, `ocean`, `forest`, `neon`, `minimal`. Sin Unicode (`OHUB_ASCII=1`) cae a ASCII. Sin TTY o con `NO_COLOR` no usa color.
 
 ## Limitaciones
